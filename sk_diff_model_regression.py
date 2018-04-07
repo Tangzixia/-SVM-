@@ -15,7 +15,7 @@ from sklearn.model_selection import cross_val_score #交叉验证
 from sklearn.ensemble import GradientBoostingRegressor
 #from sklearn.ensemble import AdaBoostingRegressor
 from sklearn.ensemble import BaggingRegressor,ExtraTreesRegressor
-
+from sklearn.cross_validation import KFold,StratifiedKFold,LeaveOneOut,LeavePOut,LeaveOneLabelOut,LeavePLabelOut
 
 
 #在分类器或者回归器中总有random_state这个参数，那么这个参数是用来干嘛的呢？
@@ -31,16 +31,17 @@ from sklearn.ensemble import BaggingRegressor,ExtraTreesRegressor
 #即用random_state参数，我们可以固定我们想要固定的随机数
 
 housing=fetch_california_housing()
-print(housing.DESCR)
+#print(housing.DESCR)
 #获取到该数据集中的不同特征的名称
 #['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
-print(housing.feature_names)
-print(housing.data.shape)
+#print(housing.feature_names)
+#print(housing.data.shape)
 
 #观察对应的标签，我们可以发现
 #对应的标签为连续型的，因此我们需要训练一个回归器进行处理
 #[ 4.526  3.585  3.521 ...,  0.923  0.847  0.894]
 #print(housing.target)
+
 dtr=tree.DecisionTreeRegressor(max_depth=2)
 dtr.fit(housing.data[:,:],housing.target)
 
@@ -51,6 +52,8 @@ img=Image(graph.create_png())
 #print(img.data)
 #display(img)
 #graph.write_png("dtr_white_background.png")
+#cv=cross_validation.ShuffleSplit(n_samples,n_iter=3,test_size=0.3,random_state=0)
+
 
 #决策树进行预测
 #0.624977554157
@@ -58,8 +61,25 @@ data_train,data_test,target_train,target_test=\
 		train_test_split(housing.data,housing.target,test_size=0.1,random_state=42)
 dtr=tree.DecisionTreeRegressor()
 dtr.fit(data_train,target_train)
-score=dtr.score(data_test,target_test)
-print(score)
+#score=dtr.score(data_test,target_test)
+kf=KFold(data_train.shape[0],n_folds=5)
+skf=StratifiedKFold(target_train,n_folds=5)
+loo=LeaveOneOut(data_train.shape[0])
+lpo=LeavePOut(data_train.shape[0],6)
+
+labels_lolo=[1,1,2,2]
+lolo=LeaveOneLabelOut(labels_lolo)
+#这个策略在划分样本时，会根据第三方提供的整数型样本类标号进行划分
+#每次划分数据集时，去除某个属于某个类裱好的样本作为测试集，剩余的作为训练集
+labels_lopo=[1,1,2,2,3,3]
+lopo=LeavePLabelOut(labels_lopo,2)
+#这个策略每次取得p种类标号的数据作为测试集，其余作为训练集
+
+#注意cross_val_score中的cv参数
+cross_score=cross_val_score(dtr,data_train,target_train,cv=skf)
+print("交叉验证：")
+print(cross_score)
+#print(score)
 
 '''
 #这种无法使用metrics进行判断，原因在于continous is not supported
