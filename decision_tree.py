@@ -16,7 +16,9 @@ print(clf.predict_proba([[2,2]]))
 '''
 
 iris=load_iris()
-#根据criterion的不同取值确定是id3,c4.5还是cart算法
+#注意sklearn中默认的为CART算法，无法实现id3算法或者C4.5算法
+#原因在于id3算法或者C4.5算法都可能不是二叉树，而sklearn中的树是二叉树
+#因此其只能是CART算法
 clf=tree.DecisionTreeClassifier(criterion="gini")
 #clf.fit(iris.data,iris.target)
 
